@@ -214,6 +214,13 @@ def _consultar_ce(cnpj14: str) -> ResultadoCertidao | None:
                 if m:
                     validade = m.group(1)
 
+                # Capturar PDF do resultado antes de fechar o browser
+                pdf_bytes = None
+                try:
+                    pdf_bytes = page.pdf(format="A4", print_background=True)
+                except Exception:
+                    pass
+
                 browser.close()
 
             except PWTimeout:
@@ -228,12 +235,12 @@ def _consultar_ce(cnpj14: str) -> ResultadoCertidao | None:
 
         if any(k in html_lower for k in neg):
             return ResultadoCertidao(
-                **base, status=Status.REGULAR, validade=validade,
+                **base, status=Status.REGULAR, validade=validade, pdf_bytes=pdf_bytes,
                 mensagem="Certidão Negativa Estadual do Ceará. Nenhum débito estadual encontrado.",
             )
         if any(k in html_lower for k in pos):
             return ResultadoCertidao(
-                **base, status=Status.IRREGULAR,
+                **base, status=Status.IRREGULAR, pdf_bytes=pdf_bytes,
                 mensagem=f"Existem débitos estaduais no Ceará para o CNPJ {cnpj_fmt}.",
             )
         if any(k in html_lower for k in err):

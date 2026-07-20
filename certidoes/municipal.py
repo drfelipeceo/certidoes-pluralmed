@@ -276,6 +276,7 @@ def _consultar_speedgov(cnpj14: str, info: dict) -> ResultadoCertidao | None:
     base = dict(tipo="municipal", nome=f"Certidão Negativa Municipal — {cidade}",
                 orgao=info["orgao"], url=info["url"])
 
+    pdf_bytes = None
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(
@@ -322,6 +323,14 @@ def _consultar_speedgov(cnpj14: str, info: dict) -> ResultadoCertidao | None:
                 page.wait_for_timeout(5000)
                 html = page.content()
                 html_lower = html.lower()
+
+                # Capturar PDF do resultado antes de fechar
+                if _neg_keywords(html_lower) or _pos_keywords(html_lower):
+                    try:
+                        pdf_bytes = page.pdf(format="A4", print_background=True)
+                    except Exception:
+                        pass
+
                 browser.close()
 
             except PWTimeout:
@@ -335,10 +344,10 @@ def _consultar_speedgov(cnpj14: str, info: dict) -> ResultadoCertidao | None:
             return None  # Cai no fallback de link
 
         if _neg_keywords(html_lower):
-            return ResultadoCertidao(**base, status=Status.REGULAR,
+            return ResultadoCertidao(**base, status=Status.REGULAR, pdf_bytes=pdf_bytes,
                                      mensagem=f"Certidão Negativa Municipal de {cidade} emitida com sucesso.")
         if _pos_keywords(html_lower):
-            return ResultadoCertidao(**base, status=Status.IRREGULAR,
+            return ResultadoCertidao(**base, status=Status.IRREGULAR, pdf_bytes=pdf_bytes,
                                      mensagem=f"Existem débitos municipais em {cidade} para o CNPJ {cnpj_fmt}.")
         return None
 
@@ -359,6 +368,7 @@ def _consultar_fortaleza(cnpj14: str, info: dict) -> ResultadoCertidao | None:
 
     for _tentativa in range(5):
         captcha_bytes: bytes | None = None
+        pdf_bytes: bytes | None = None
 
         try:
             with sync_playwright() as p:
@@ -483,6 +493,14 @@ def _consultar_fortaleza(cnpj14: str, info: dict) -> ResultadoCertidao | None:
                     page.wait_for_timeout(6000)
                     html = page.content()
                     html_lower = html.lower()
+
+                    # Capturar PDF do resultado antes de fechar
+                    if _neg_keywords(html_lower) or _pos_keywords(html_lower):
+                        try:
+                            pdf_bytes = page.pdf(format="A4", print_background=True)
+                        except Exception:
+                            pass
+
                     browser.close()
 
                 except PWTimeout:
@@ -496,10 +514,10 @@ def _consultar_fortaleza(cnpj14: str, info: dict) -> ResultadoCertidao | None:
                 continue
 
             if _neg_keywords(html_lower):
-                return ResultadoCertidao(**base, status=Status.REGULAR,
+                return ResultadoCertidao(**base, status=Status.REGULAR, pdf_bytes=pdf_bytes,
                                          mensagem="Certidão Negativa Municipal de Fortaleza emitida com sucesso.")
             if _pos_keywords(html_lower):
-                return ResultadoCertidao(**base, status=Status.IRREGULAR,
+                return ResultadoCertidao(**base, status=Status.IRREGULAR, pdf_bytes=pdf_bytes,
                                          mensagem=f"Existem débitos municipais em Fortaleza para o CNPJ {cnpj_fmt}.")
 
             return None

@@ -120,17 +120,28 @@ def consultar(cnpj14: str) -> ResultadoCertidao:
                     except Exception:
                         pass
 
+                    pdf_bytes = None
+                    try:
+                        pdf_bytes = page.pdf(format="A4", print_background=True)
+                    except Exception:
+                        pass
+
                     browser.close()
                     return ResultadoCertidao(
                         **base, status=Status.REGULAR,
-                        validade=validade, numero=numero,
+                        validade=validade, numero=numero, pdf_bytes=pdf_bytes,
                         mensagem=f"Empresa REGULAR no FGTS. CRF n° {numero or 'N/A'} | Validade: {validade or 'N/A'}",
                     )
 
                 if any(k in html_lower for k in ["irregular", "não regular", "inadimplente"]):
+                    pdf_bytes = None
+                    try:
+                        pdf_bytes = page.pdf(format="A4", print_background=True)
+                    except Exception:
+                        pass
                     browser.close()
                     return ResultadoCertidao(
-                        **base, status=Status.IRREGULAR,
+                        **base, status=Status.IRREGULAR, pdf_bytes=pdf_bytes,
                         mensagem=f"Irregularidade no FGTS para o CNPJ {cnpj_fmt}.",
                     )
 

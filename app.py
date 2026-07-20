@@ -83,6 +83,14 @@ st.markdown(
                   padding:1rem 1.5rem; font-size:1.15rem; font-weight:700; text-align:center;}
 
     hr.divisor {border: none; border-top: 1px solid #e0e0e0; margin: 1.5rem 0;}
+
+    @media print {
+        #MainMenu, footer, header, [data-testid="stToolbar"],
+        [data-testid="stSidebar"], [data-testid="stForm"],
+        button, .stDownloadButton { display: none !important; }
+        .card { break-inside: avoid; }
+        .cabecalho { background: #071D41 !important; -webkit-print-color-adjust: exact; }
+    }
 </style>
 """,
     unsafe_allow_html=True,
@@ -282,7 +290,7 @@ if submitted:
             if res.url and not res.tem_pdf:
                 st.write("")  # espaço
 
-    # ─── Botão: baixar todas as certidões em ZIP ──────────────────────────────
+    # ─── Botão: baixar todas as certidões em ZIP + imprimir ──────────────────
     if pdfs_disponiveis:
         import zipfile, io
         st.markdown('<hr class="divisor">', unsafe_allow_html=True)
@@ -293,12 +301,22 @@ if submitted:
                 zf.writestr(f"certidao_{tipo}_{cnpj14}.pdf", dados)
         zip_buf.seek(0)
 
-        st.download_button(
-            label=f"📦  Baixar {len(pdfs_disponiveis)} certidão(ões) em ZIP",
-            data=zip_buf.getvalue(),
-            file_name=f"certidoes_{cnpj14}.zip",
-            mime="application/zip",
-        )
+        col_zip, col_print, _ = st.columns([2, 1.5, 4])
+        with col_zip:
+            st.download_button(
+                label=f"📦  Baixar {len(pdfs_disponiveis)} certidão(ões) em ZIP",
+                data=zip_buf.getvalue(),
+                file_name=f"certidoes_{cnpj14}.zip",
+                mime="application/zip",
+            )
+        with col_print:
+            st.markdown(
+                '<button onclick="window.print()" style="'
+                "background:#1351B4;color:#fff;border:none;border-radius:6px;"
+                "padding:0.45rem 1rem;font-size:0.9rem;cursor:pointer;width:100%;"
+                '">🖨️ Imprimir página</button>',
+                unsafe_allow_html=True,
+            )
 
     # ─── Links rápidos para os portais não automatizados ──────────────────────
     portais_manuais = [r for r in resultados.values() if r.status in (Status.ERRO, Status.NAO_SUPORTADO) and r.url]
