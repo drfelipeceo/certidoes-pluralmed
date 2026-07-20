@@ -152,19 +152,29 @@ if submitted:
         "municipal":   lambda: municipal.consultar(cnpj14, municipio_input, estado_sel),
     }
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
         futures = {k: pool.submit(fn) for k, fn in tarefas.items()}
         total = len(futures)
-        # Atualizar progresso conforme as tarefas completam (federal pode demorar mais)
         done = set()
+        deadline = time.time() + 90  # timeout global de 90 segundos
         while len(done) < total:
             for k, fut in futures.items():
                 if k not in done and fut.done():
                     resultados[k] = fut.result()
                     done.add(k)
-                    texto = f"Consultando… ({len(done)}/{total})"
-                    progresso.progress(len(done) / total, text=texto)
+                    progresso.progress(len(done) / total, text=f"Consultando… ({len(done)}/{total})")
             if len(done) < total:
+                if time.time() > deadline:
+                    for k in tarefas:
+                        if k not in done:
+                            from certidoes.base import ResultadoCertidao as _R
+                            resultados[k] = _R(
+                                tipo=k, nome=k.capitalize(), orgao="",
+                                url=None, status=Status.ERRO,
+                                mensagem="Timeout: consulta demorou demais. Tente novamente.",
+                            )
+                            done.add(k)
+                    break
                 time.sleep(0.5)
 
     progresso.empty()

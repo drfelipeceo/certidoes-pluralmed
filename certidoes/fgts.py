@@ -43,7 +43,12 @@ def consultar(cnpj14: str) -> ResultadoCertidao:
             browser = p.chromium.launch(
                 headless=True,
                 executable_path=chrome_path,
-                args=["--disable-blink-features=AutomationControlled", "--no-sandbox"],
+                args=[
+                    "--disable-blink-features=AutomationControlled",
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu",
+                ],
             )
             ctx = browser.new_context(
                 user_agent=HEADERS_NAVEGADOR["User-Agent"],
