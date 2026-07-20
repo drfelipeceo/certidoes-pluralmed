@@ -1,7 +1,14 @@
 #!/bin/sh
 # Inicia Tor em background e aguarda SOCKS5 estar disponível
 mkdir -p /tmp/tor-data
-tor --RunAsDaemon 1 --DataDirectory /tmp/tor-data --Log "warn stderr" --SocksPort 9050
+tor --RunAsDaemon 1 \
+    --DataDirectory /tmp/tor-data \
+    --Log "warn stderr" \
+    --SocksPort 9050 \
+    --MaxMemInQueues 10 MB \
+    --NumEntryGuards 1 \
+    --BandwidthRate 2 MB \
+    --BandwidthBurst 4 MB
 
 echo "Aguardando Tor bootstrapar..."
 i=0

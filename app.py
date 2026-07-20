@@ -174,6 +174,8 @@ if submitted:
                 if k == "trabalhista":
                     from certidoes.ocr import release as _rel
                     _rel()
+                import gc
+                gc.collect()
                 progresso.progress(len(done) / total, text=f"Consultando… ({len(done)}/{total})")
         if len(done) < total:
             if time.time() > deadline:
