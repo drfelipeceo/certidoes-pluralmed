@@ -280,10 +280,7 @@ def _consultar_speedgov(cnpj14: str, info: dict) -> ResultadoCertidao | None:
         with sync_playwright() as p:
             browser = p.chromium.launch(
                 headless=True,
-                args=[
-                    "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu",
-                    "--single-process", "--renderer-process-limit=1",
-                ],
+                args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"],
             )
             ctx = browser.new_context(user_agent=HEADERS_NAVEGADOR["User-Agent"],
                                       viewport={"width": 1280, "height": 720})
@@ -381,10 +378,7 @@ def _consultar_fortaleza(cnpj14: str, info: dict) -> ResultadoCertidao | None:
             with sync_playwright() as p:
                 browser = p.chromium.launch(
                 headless=True,
-                args=[
-                    "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu",
-                    "--single-process", "--renderer-process-limit=1",
-                ],
+                args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"],
             )
                 ctx = browser.new_context(user_agent=HEADERS_NAVEGADOR["User-Agent"],
                                           viewport={"width": 1280, "height": 900})

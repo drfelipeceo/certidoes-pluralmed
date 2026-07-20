@@ -23,8 +23,6 @@ _BROWSER_ARGS = [
     "--no-sandbox",
     "--disable-dev-shm-usage",
     "--disable-gpu",
-    "--single-process",
-    "--renderer-process-limit=1",
 ]
 
 

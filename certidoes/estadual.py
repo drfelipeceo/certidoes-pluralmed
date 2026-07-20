@@ -141,10 +141,7 @@ def _consultar_ce(cnpj14: str) -> ResultadoCertidao | None:
         with sync_playwright() as p:
             browser = p.chromium.launch(
                 headless=True,
-                args=[
-                    "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu",
-                    "--single-process", "--renderer-process-limit=1",
-                ],
+                args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"],
             )
             ctx = browser.new_context(
                 user_agent=HEADERS_NAVEGADOR["User-Agent"],

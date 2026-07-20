@@ -156,7 +156,7 @@ if submitted:
     futures = {k: pool.submit(fn) for k, fn in tarefas.items()}
     total = len(futures)
     done = set()
-    deadline = time.time() + 90  # timeout global de 90 segundos
+    deadline = time.time() + 180  # timeout global de 3 minutos (sequencial)
 
     while len(done) < total:
         for k, fut in futures.items():
