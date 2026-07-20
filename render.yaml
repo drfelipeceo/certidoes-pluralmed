@@ -1,0 +1,5 @@
+services:
+  - type: web
+    name: certidoes-pluralmed
+    env: docker
+    healthCheckPath: /_stcore/health
