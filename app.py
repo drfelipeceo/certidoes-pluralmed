@@ -107,26 +107,33 @@ st.markdown(
 )
 
 # ─── Cabeçalho ────────────────────────────────────────────────────────────────
+# CSS background-image bypassa o DOMPurify do Streamlit (que sanitiza <img data:> e <svg defs>)
+if _LOGO_ESCURO:
+    st.markdown(
+        f"""
+<style>
+.pm-logo-row {{
+    background-image: url('data:image/svg+xml;base64,{_LOGO_ESCURO}');
+    background-repeat: no-repeat;
+    background-size: auto 54px;
+    background-position: left center;
+    padding-left: 258px;
+    min-height: 72px;
+}}
+</style>
+""",
+        unsafe_allow_html=True,
+    )
+
 st.markdown(
-    f"""
+    """
 <div class="cabecalho">
-  <div style="display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap;">
-
-    <!-- Logo PluralMed oficial (SVG fundo escuro) -->
-    <img src="data:image/svg+xml;base64,{_LOGO_ESCURO}"
-         height="54"
-         style="flex-shrink:0;display:block;"
-         alt="PluralMed">
-
-    <!-- Divisor -->
+  <div class="pm-logo-row" style="display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;">
     <div style="width:1px;background:rgba(255,255,255,0.25);height:46px;flex-shrink:0;"></div>
-
-    <!-- Título do sistema -->
     <div>
       <div style="font-size:1.35rem;font-weight:700;color:#fff;">📋 Certidões Negativas</div>
       <div style="font-size:0.82rem;color:rgba(255,255,255,0.82);margin-top:0.2rem;">Consulta automática · Trabalhista · Federal · FGTS · Estadual · Municipal</div>
     </div>
-
   </div>
 </div>
 """,
