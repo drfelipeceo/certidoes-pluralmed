@@ -138,10 +138,6 @@ if submitted:
         st.stop()
 
     st.markdown(f"**Empresa:** `{cnpj_fmt}` — {estado_sel} / {municipio_input}")
-    st.info(
-        "🔐 **Certidão Federal (RF/PGFN):** uma janela do Chrome abrirá automaticamente. "
-        "Resolva o captcha que aparecer — a janela fechará sozinha após a emissão."
-    )
     st.markdown('<hr class="divisor">', unsafe_allow_html=True)
 
     # Executa as 5 consultas em paralelo
@@ -166,10 +162,7 @@ if submitted:
                 if k not in done and fut.done():
                     resultados[k] = fut.result()
                     done.add(k)
-                    texto = (
-                        "⏳ Aguardando captcha federal… (resolva no Chrome que abriu)"
-                        if "federal" not in done else f"Consultando… ({len(done)}/{total})"
-                    )
+                    texto = f"Consultando… ({len(done)}/{total})"
                     progresso.progress(len(done) / total, text=texto)
             if len(done) < total:
                 time.sleep(0.5)
