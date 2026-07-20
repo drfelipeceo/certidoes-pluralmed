@@ -9,13 +9,22 @@ import warnings
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
-try:
-    import ddddocr
-    _ocr = ddddocr.DdddOcr(show_ad=False)
-    _ocr_beta = ddddocr.DdddOcr(beta=True, show_ad=False)
-    _OCR_OK = True
-except ImportError:
-    _OCR_OK = False
+_ocr = None
+_ocr_beta = None
+_OCR_OK = None
+
+
+def _get_ocr():
+    global _ocr, _ocr_beta, _OCR_OK
+    if _OCR_OK is None:
+        try:
+            import ddddocr
+            _ocr = ddddocr.DdddOcr(show_ad=False)
+            _ocr_beta = ddddocr.DdddOcr(beta=True, show_ad=False)
+            _OCR_OK = True
+        except ImportError:
+            _OCR_OK = False
+    return _OCR_OK
 
 from .base import ResultadoCertidao, Status, HEADERS_NAVEGADOR
 
@@ -28,7 +37,7 @@ MAX_TENTATIVAS = 8
 
 def _resolver_captcha(imagem_bytes: bytes) -> str:
     """OCR na imagem do captcha. Filtra apenas ASCII alfanumérico."""
-    if not _OCR_OK:
+    if not _get_ocr():
         return ""
     from PIL import Image, ImageFilter, ImageEnhance
     # Tenta modo padrão e beta, usa o que der mais caracteres
@@ -156,7 +165,7 @@ def consultar(cnpj14: str) -> ResultadoCertidao:
         url=URL_PORTAL,
     )
 
-    if not _OCR_OK:
+    if not _get_ocr():
         return ResultadoCertidao(
             **base,
             status=Status.ERRO,
