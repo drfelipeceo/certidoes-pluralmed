@@ -161,8 +161,19 @@ if submitted:
     while len(done) < total:
         for k, fut in futures.items():
             if k not in done and fut.done():
-                resultados[k] = fut.result()
+                try:
+                    resultados[k] = fut.result()
+                except Exception as _e:
+                    from certidoes.base import ResultadoCertidao as _R
+                    resultados[k] = _R(
+                        tipo=k, nome=k.capitalize(), orgao="", url=None,
+                        status=Status.ERRO,
+                        mensagem=f"Erro inesperado: {type(_e).__name__}. Tente novamente.",
+                    )
                 done.add(k)
+                if k == "trabalhista":
+                    from certidoes.ocr import release as _rel
+                    _rel()
                 progresso.progress(len(done) / total, text=f"Consultando… ({len(done)}/{total})")
         if len(done) < total:
             if time.time() > deadline:

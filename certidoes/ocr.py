@@ -1,4 +1,4 @@
-"""Singleton compartilhado do ddddocr — carregado uma vez, reutilizado por todos."""
+"""Singleton compartilhado do ddddocr — carregado sob demanda, liberável entre tarefas."""
 import io
 _ocr = None
 _ocr_beta = None
@@ -16,6 +16,16 @@ def get_ocr():
         except ImportError:
             _OCR_OK = False
     return _OCR_OK
+
+
+def release():
+    """Libera os modelos da memória e força GC — chame após trabalhista terminar."""
+    global _ocr, _ocr_beta, _OCR_OK
+    _ocr = None
+    _ocr_beta = None
+    _OCR_OK = None
+    import gc
+    gc.collect()
 
 
 def classificar(imagem_bytes: bytes) -> str:
