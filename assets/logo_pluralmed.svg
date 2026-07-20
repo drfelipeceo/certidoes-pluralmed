@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 90">
+  <defs>
+    <clipPath id="hc">
+      <path d="M45,82 C45,82 2,57 2,30 C2,14 13,3 27,3 C36,3 43,8 45,17 C47,8 54,3 63,3 C77,3 88,14 88,30 C88,57 45,82 45,82Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Teal base — aparece no V inferior do coração -->
+  <path d="M45,82 C45,82 2,57 2,30 C2,14 13,3 27,3 C36,3 43,8 45,17 C47,8 54,3 63,3 C77,3 88,14 88,30 C88,57 45,82 45,82Z" fill="#00B5C5"/>
+  <!-- Lóbulo esquerdo — azul -->
+  <circle cx="27" cy="25" r="28" fill="#1A5CB8" clip-path="url(#hc)"/>
+  <!-- Lóbulo direito — verde-limão -->
+  <circle cx="63" cy="25" r="28" fill="#8FD45A" clip-path="url(#hc)"/>
+
+  <!-- Wordmark PluralMed -->
+  <text x="106" y="52"
+        font-family="'Arial Rounded MT Bold', 'Nunito', 'Trebuchet MS', Arial, sans-serif"
+        font-weight="800" font-size="42" fill="#0D6E6E">PluralMed</text>
+
+  <!-- Tagline -->
+  <text x="108" y="72"
+        font-family="'Trebuchet MS', Arial, sans-serif"
+        font-weight="700" font-size="11" fill="#E8836A"
+        letter-spacing="2">GESTÃO DE SAÚDE COM EXCELÊNCIA</text>
+</svg>

@@ -35,14 +35,12 @@ st.markdown(
     .block-container {padding-top: 1.5rem; padding-bottom: 2rem;}
 
     .cabecalho {
-        background: linear-gradient(135deg, #071D41 0%, #1351B4 100%);
+        background: linear-gradient(135deg, #0A5858 0%, #0D7272 100%);
         border-radius: 12px;
-        padding: 1.6rem 2rem;
+        padding: 1.3rem 2rem;
         color: #fff;
         margin-bottom: 1.8rem;
     }
-    .cabecalho h1 {margin: 0; font-size: 1.8rem; font-weight: 700;}
-    .cabecalho p  {margin: 0.3rem 0 0; font-size: 0.95rem; opacity: 0.85;}
 
     /* Cards de certidão */
     .card {
@@ -55,7 +53,7 @@ st.markdown(
     .card-regular  {border-left: 5px solid #168821; background: #f5fff7;}
     .card-irregular{border-left: 5px solid #E52207; background: #fff5f5;}
     .card-erro     {border-left: 5px solid #FFCD07; background: #fffef0;}
-    .card-link     {border-left: 5px solid #1351B4; background: #f5f8ff;}
+    .card-link     {border-left: 5px solid #0D6E6E; background: #f0fafa;}
 
     .card-title {font-size: 1rem; font-weight: 700; color: #071D41; margin: 0;}
     .card-orgao {font-size: 0.78rem; color: #666; margin: 0.1rem 0 0.5rem;}
@@ -73,7 +71,7 @@ st.markdown(
     .badge-regular   {background: #168821; color: #fff;}
     .badge-irregular {background: #E52207; color: #fff;}
     .badge-erro      {background: #FFCD07; color: #333;}
-    .badge-link      {background: #1351B4; color: #fff;}
+    .badge-link      {background: #0D6E6E; color: #fff;}
 
     .resumo-ok   {background:#d4edda; color:#155724; border-radius:10px;
                   padding:1rem 1.5rem; font-size:1.15rem; font-weight:700; text-align:center;}
@@ -100,8 +98,36 @@ st.markdown(
 st.markdown(
     """
 <div class="cabecalho">
-  <h1>📋 Certidões Negativas</h1>
-  <p>Consulta automática das 5 certidões: Trabalhista · Federal · FGTS · Estadual · Municipal</p>
+  <div style="display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;">
+
+    <!-- Ícone coração PluralMed -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 88" height="62" style="flex-shrink:0">
+      <defs>
+        <clipPath id="plmed-hc">
+          <path d="M45,82 C45,82 2,57 2,30 C2,14 13,3 27,3 C36,3 43,8 45,17 C47,8 54,3 63,3 C77,3 88,14 88,30 C88,57 45,82 45,82Z"/>
+        </clipPath>
+      </defs>
+      <path d="M45,82 C45,82 2,57 2,30 C2,14 13,3 27,3 C36,3 43,8 45,17 C47,8 54,3 63,3 C77,3 88,14 88,30 C88,57 45,82 45,82Z" fill="#00B5C5"/>
+      <circle cx="27" cy="25" r="28" fill="#1A5CB8" clip-path="url(#plmed-hc)"/>
+      <circle cx="63" cy="25" r="28" fill="#8FD45A" clip-path="url(#plmed-hc)"/>
+    </svg>
+
+    <!-- Nome e tagline -->
+    <div style="line-height:1.15;">
+      <div style="font-size:2rem;font-weight:800;color:#fff;letter-spacing:-0.02em;">PluralMed</div>
+      <div style="font-size:0.58rem;color:rgba(255,255,255,0.72);letter-spacing:0.22em;font-weight:700;margin-top:0.1rem;">GESTÃO DE SAÚDE COM EXCELÊNCIA</div>
+    </div>
+
+    <!-- Divisor -->
+    <div style="width:1px;background:rgba(255,255,255,0.25);height:46px;margin:0 0.6rem;flex-shrink:0;"></div>
+
+    <!-- Título do sistema -->
+    <div>
+      <div style="font-size:1.35rem;font-weight:700;color:#fff;">📋 Certidões Negativas</div>
+      <div style="font-size:0.82rem;color:rgba(255,255,255,0.82);margin-top:0.2rem;">Consulta automática · Trabalhista · Federal · FGTS · Estadual · Municipal</div>
+    </div>
+
+  </div>
 </div>
 """,
     unsafe_allow_html=True,
@@ -312,7 +338,7 @@ if submitted:
         with col_print:
             st.markdown(
                 '<button onclick="window.print()" style="'
-                "background:#1351B4;color:#fff;border:none;border-radius:6px;"
+                "background:#0D6E6E;color:#fff;border:none;border-radius:6px;"
                 "padding:0.45rem 1rem;font-size:0.9rem;cursor:pointer;width:100%;"
                 '">🖨️ Imprimir página</button>',
                 unsafe_allow_html=True,
