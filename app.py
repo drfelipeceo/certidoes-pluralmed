@@ -152,30 +152,33 @@ if submitted:
         "municipal":   lambda: municipal.consultar(cnpj14, municipio_input, estado_sel),
     }
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
-        futures = {k: pool.submit(fn) for k, fn in tarefas.items()}
-        total = len(futures)
-        done = set()
-        deadline = time.time() + 90  # timeout global de 90 segundos
-        while len(done) < total:
-            for k, fut in futures.items():
-                if k not in done and fut.done():
-                    resultados[k] = fut.result()
-                    done.add(k)
-                    progresso.progress(len(done) / total, text=f"Consultando… ({len(done)}/{total})")
-            if len(done) < total:
-                if time.time() > deadline:
-                    for k in tarefas:
-                        if k not in done:
-                            from certidoes.base import ResultadoCertidao as _R
-                            resultados[k] = _R(
-                                tipo=k, nome=k.capitalize(), orgao="",
-                                url=None, status=Status.ERRO,
-                                mensagem="Timeout: consulta demorou demais. Tente novamente.",
-                            )
-                            done.add(k)
-                    break
-                time.sleep(0.5)
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=3)
+    futures = {k: pool.submit(fn) for k, fn in tarefas.items()}
+    total = len(futures)
+    done = set()
+    deadline = time.time() + 90  # timeout global de 90 segundos
+
+    while len(done) < total:
+        for k, fut in futures.items():
+            if k not in done and fut.done():
+                resultados[k] = fut.result()
+                done.add(k)
+                progresso.progress(len(done) / total, text=f"Consultando… ({len(done)}/{total})")
+        if len(done) < total:
+            if time.time() > deadline:
+                for k in tarefas:
+                    if k not in done:
+                        from certidoes.base import ResultadoCertidao as _R
+                        resultados[k] = _R(
+                            tipo=k, nome=k.capitalize(), orgao="",
+                            url=None, status=Status.ERRO,
+                            mensagem="Timeout: consulta demorou demais. Tente novamente.",
+                        )
+                        done.add(k)
+                break
+            time.sleep(0.5)
+
+    pool.shutdown(wait=False, cancel_futures=True)  # não bloqueia em threads travadas
 
     progresso.empty()
 

@@ -32,6 +32,13 @@ def consultar(cnpj14: str) -> ResultadoCertidao:
     )
     cnpj_fmt = f"{cnpj14[:2]}.{cnpj14[2:5]}.{cnpj14[5:8]}/{cnpj14[8:12]}-{cnpj14[12:]}"
 
+    # Em cloud/Linux o ShieldSquare bloqueia IPs de data center — retorna link
+    if sys.platform != "darwin":
+        return ResultadoCertidao(
+            **base, status=Status.NAO_SUPORTADO,
+            mensagem=f"Acesse o portal → informe o CNPJ {cnpj_fmt} → clique Emitir CRF.",
+        )
+
     try:
         import os
         if sys.platform == "darwin":
