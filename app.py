@@ -152,7 +152,7 @@ if submitted:
         "municipal":   lambda: municipal.consultar(cnpj14, municipio_input, estado_sel),
     }
 
-    pool = concurrent.futures.ThreadPoolExecutor(max_workers=3)
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
     futures = {k: pool.submit(fn) for k, fn in tarefas.items()}
     total = len(futures)
     done = set()
