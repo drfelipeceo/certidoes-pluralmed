@@ -1,7 +1,7 @@
 """
 Certificado de Regularidade do FGTS (CRF) — Caixa Econômica Federal
 Portal JSF protegido por ShieldSquare. Usa Chrome real no Mac (bypassa)
-ou Playwright Chromium no cloud (tenta; se bloqueado, retorna link).
+ou Playwright via proxy Tor no cloud (exit node != IP de datacenter).
 """
 import re
 import sys
@@ -26,6 +26,16 @@ _BROWSER_ARGS = [
 ]
 
 
+def _tor_disponivel() -> bool:
+    import socket
+    s = socket.socket()
+    s.settimeout(2)
+    try:
+        return s.connect_ex(("127.0.0.1", 9050)) == 0
+    finally:
+        s.close()
+
+
 def consultar(cnpj14: str) -> ResultadoCertidao:
     import os
     from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
@@ -38,14 +48,24 @@ def consultar(cnpj14: str) -> ResultadoCertidao:
     )
     cnpj_fmt = f"{cnpj14[:2]}.{cnpj14[2:5]}.{cnpj14[5:8]}/{cnpj14[8:12]}-{cnpj14[12:]}"
 
-    # Mac: Chrome real bypassa ShieldSquare. Cloud: Playwright Chromium (tenta; fallback = link)
-    chrome_path = _CHROME_PATH_MAC if (sys.platform == "darwin" and os.path.exists(_CHROME_PATH_MAC)) else None
+    # Mac: Chrome real bypassa ShieldSquare sem proxy.
+    # Cloud: tenta via Tor (exit node residencial); se Tor indisponível, tenta direto.
+    is_mac = sys.platform == "darwin" and os.path.exists(_CHROME_PATH_MAC)
+    chrome_path = _CHROME_PATH_MAC if is_mac else None
+
+    usar_tor = (not is_mac) and _tor_disponivel()
+    proxy_cfg = {"server": "socks5://127.0.0.1:9050"} if usar_tor else None
+
+    # Tor é mais lento — timeouts maiores
+    timeout_nav = 60000 if usar_tor else 25000
+    timeout_campo = 15000 if usar_tor else 8000
 
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(
                 headless=True,
                 executable_path=chrome_path,
+                proxy=proxy_cfg,
                 args=_BROWSER_ARGS,
             )
             ctx = browser.new_context(
@@ -56,7 +76,7 @@ def consultar(cnpj14: str) -> ResultadoCertidao:
             page.add_init_script(_STEALTH)
 
             try:
-                page.goto(URL_PORTAL, timeout=25000, wait_until="domcontentloaded")
+                page.goto(URL_PORTAL, timeout=timeout_nav, wait_until="domcontentloaded")
                 page.wait_for_timeout(2000)
 
                 if any(k in page.url for k in ["perfdrive.com", "validate", "shieldsquare"]):
@@ -67,7 +87,7 @@ def consultar(cnpj14: str) -> ResultadoCertidao:
                     )
 
                 campo = page.locator('input[name="mainForm:txtInscricao1"]')
-                campo.wait_for(state="visible", timeout=8000)
+                campo.wait_for(state="visible", timeout=timeout_campo)
                 campo.fill(cnpj14)
 
                 page.locator('input[name="mainForm:btnConsultar"]').click()
