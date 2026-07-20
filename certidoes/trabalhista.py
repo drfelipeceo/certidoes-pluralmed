@@ -9,24 +9,8 @@ import warnings
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
-_ocr = None
-_ocr_beta = None
-_OCR_OK = None
-
-
-def _get_ocr():
-    global _ocr, _ocr_beta, _OCR_OK
-    if _OCR_OK is None:
-        try:
-            import ddddocr
-            _ocr = ddddocr.DdddOcr(show_ad=False)
-            _ocr_beta = ddddocr.DdddOcr(beta=True, show_ad=False)
-            _OCR_OK = True
-        except ImportError:
-            _OCR_OK = False
-    return _OCR_OK
-
 from .base import ResultadoCertidao, Status, HEADERS_NAVEGADOR
+from .ocr import get_ocr, classificar as _classificar_ocr
 
 warnings.filterwarnings("ignore", category=InsecureRequestWarning)
 
@@ -36,24 +20,7 @@ MAX_TENTATIVAS = 8
 
 
 def _resolver_captcha(imagem_bytes: bytes) -> str:
-    """OCR na imagem do captcha. Filtra apenas ASCII alfanumérico."""
-    if not _get_ocr():
-        return ""
-    from PIL import Image, ImageFilter, ImageEnhance
-    # Tenta modo padrão e beta, usa o que der mais caracteres
-    raw1 = "".join(c for c in _ocr.classification(imagem_bytes) if c.isascii() and c.isalnum())
-    raw2 = "".join(c for c in _ocr_beta.classification(imagem_bytes) if c.isascii() and c.isalnum())
-    # Pré-processamento: binarização threshold=180
-    img = Image.open(io.BytesIO(imagem_bytes)).convert("L")
-    binary = img.point(lambda x: 0 if x < 180 else 255, "L")
-    buf = io.BytesIO()
-    binary.save(buf, format="PNG")
-    raw3 = "".join(c for c in _ocr.classification(buf.getvalue()) if c.isascii() and c.isalnum())
-    # Escolhe o resultado com mais caracteres (geralmente mais completo)
-    candidatos = [r for r in [raw1, raw2, raw3] if r]
-    if not candidatos:
-        return ""
-    return max(candidatos, key=len)
+    return _classificar_ocr(imagem_bytes)
 
 
 def _iniciar_sessao() -> tuple[requests.Session, str, str]:
@@ -165,7 +132,7 @@ def consultar(cnpj14: str) -> ResultadoCertidao:
         url=URL_PORTAL,
     )
 
-    if not _get_ocr():
+    if not get_ocr():
         return ResultadoCertidao(
             **base,
             status=Status.ERRO,

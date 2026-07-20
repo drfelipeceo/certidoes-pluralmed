@@ -1,9 +1,17 @@
 FROM python:3.11-slim
 
-# ── Dependências mínimas de sistema ───────────────────────────────────────────
+# ── Dependências mínimas ───────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        ca-certificates curl \
+        wget ca-certificates curl \
         libgl1 libglib2.0-0 libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── Google Chrome Stable (bypassa ShieldSquare do FGTS via TLS fingerprint) ───
+RUN wget -q -O /tmp/chrome.deb \
+        "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb" \
+    && apt-get update \
+    && apt-get install -y /tmp/chrome.deb \
+    && rm /tmp/chrome.deb \
     && rm -rf /var/lib/apt/lists/*
 
 # ── App ───────────────────────────────────────────────────────────────────────
@@ -11,7 +19,6 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Playwright: Chromium para automação dos portais
 RUN playwright install --with-deps chromium
 
 COPY . .

@@ -349,27 +349,13 @@ def _consultar_speedgov(cnpj14: str, info: dict) -> ResultadoCertidao | None:
 def _consultar_fortaleza(cnpj14: str, info: dict) -> ResultadoCertidao | None:
     """Fortaleza: JSF Seam + captcha de imagem (ddddocr). Até 5 tentativas."""
     import base64 as _b64
-    import ddddocr
-    from PIL import Image
     from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
+    from .ocr import classificar as _ocr_captcha
 
     URL = info["url"]
     cnpj_fmt = f"{cnpj14[:2]}.{cnpj14[2:5]}.{cnpj14[5:8]}/{cnpj14[8:12]}-{cnpj14[12:]}"
     base = dict(tipo="municipal", nome="Certidão Negativa Municipal — Fortaleza",
                 orgao="SEFIN-FOR", url=URL)
-
-    _ocr = ddddocr.DdddOcr(show_ad=False)
-    _ocr_beta = ddddocr.DdddOcr(beta=True, show_ad=False)
-
-    def _ocr_captcha(img_bytes: bytes) -> str:
-        r1 = "".join(c for c in _ocr.classification(img_bytes) if c.isascii() and c.isalnum())
-        r2 = "".join(c for c in _ocr_beta.classification(img_bytes) if c.isascii() and c.isalnum())
-        img = Image.open(io.BytesIO(img_bytes)).convert("L")
-        buf = io.BytesIO()
-        img.point(lambda x: 0 if x < 180 else 255, "L").save(buf, format="PNG")
-        r3 = "".join(c for c in _ocr.classification(buf.getvalue()) if c.isascii() and c.isalnum())
-        opts = [r for r in [r1, r2, r3] if r]
-        return max(opts, key=len) if opts else ""
 
     for _tentativa in range(5):
         captcha_bytes: bytes | None = None
